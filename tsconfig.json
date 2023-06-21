@@ -1,0 +1,47 @@
+{
+  "ln": 1,
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "ES2017",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noEmitOnError": true,
+    "allowJs": false,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ],
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    },
+    "rootDir": "./"
+  },
+  "include": [
+    "src/**/*",
+    "gulpfile.ts",
+    "jest.config.ts",
+    "jest.beforeAll.ts",
+    "jest.beforeEach.ts",
+    "jest.afterAll.ts",
+    "ormConfig.js",
+    "src/types/jest-extended.d.ts",
+  ],
+  "files": ["src/types/jest-extended.d.ts"]
+}
