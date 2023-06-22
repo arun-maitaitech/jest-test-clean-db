@@ -110,7 +110,7 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
     //   console.log(`waited - ${newDbName}`)
     // }
     // otherActionOnTemplateDb = new Promise(async (resolve) => {
-      await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
+    await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
     //   otherActionOnTemplateDb = undefined;
     //   return resolve();
     // });
@@ -118,10 +118,24 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
 }
 
 
+async function deleteDb(dataSource: DataSource, dbName: string) {
+
+  const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
+  await dataSource.query(strSql);
+
+  const result2 = await dataSource.query(
+    `SELECT 1 FROM pg_database WHERE datname = '${dbName}%'`
+  );
+  if (result2.length) {
+    throw new Error(`A DB with the prefix ${dbName} still exists!`);
+  }
+}
+
+
 function replaceTestGlobalFunction() {
   try {
     const originalTest = global.test;
-    const tmp: jest.It = Object.assign(function (name: string, fn: (dbNameForThisTest: string)=>void, timeout?: number) {
+    const tmp: jest.It = Object.assign(function (name: string, fn: (dbNameForThisTest: string) => void, timeout?: number) {
       const describeName = expect.getState().currentDescribeBlock || '';
 
       if (MAX_TEST_NAME_LENGTH < name.length) {
@@ -138,7 +152,18 @@ function replaceTestGlobalFunction() {
         await initDB();
         const dbNameForThisTest = `${TEMPLATE_DB_NAME}-${name}`;
         await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, TEMPLATE_DB_NAME)
-        return fn(dbNameForThisTest);
+        let voidResult: void = undefined;
+        let error: Error | undefined = undefined;
+        try {
+          voidResult = fn(dbNameForThisTest);
+        } catch (e) {
+          error=e;
+        }
+        await deleteDb(mainDataSource, dbNameForThisTest);
+        if (error) {
+          throw error;
+        }
+        return voidResult;
       }
 
       // Call the actual Jest's test function with the validated test name and test function
