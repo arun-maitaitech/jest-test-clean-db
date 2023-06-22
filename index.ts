@@ -1,6 +1,5 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import utils from './src/utils/utils';
-import { createDatabase } from "typeorm-extension";
 
 async function sleepPromise(milliseconds: number): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -117,7 +116,7 @@ async function main() {
 
     // await dataSource.createQueryRunner("my_new_database");
     // const output = await createDatabase({ ifNotExist: true, characterSet: "UTF8" } as {});
-    const DB_NAME = new Date().toISOString();
+    const DB_NAME = new Date().toISOString().substring(0,19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
     await createNewDbOrThrow(dataSource, DB_NAME);
     await closeConnection(dataSource);
 

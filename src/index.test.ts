@@ -1,9 +1,9 @@
 describe('describe', () => {
-  test('fail', () => {
-    expect(false).toBeTruthy()
+  test('fail', (dbNameForThisTest) => {
+    expect(dbNameForThisTest).toBeFalsy()
   });
 
-  test('success', () => {
-    expect(false).toBeFalsy()
+  test('success', (dbNameForThisTest) => {
+    expect(dbNameForThisTest).toBeTruthy()
   });
 });
