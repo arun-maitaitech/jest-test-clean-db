@@ -132,9 +132,6 @@ async function deleteDb(dataSource: DataSource, dbName: string) {
 function replaceTestGlobalFunction() {
   try {
     const originalTestFn = global.test;
-    // TODO: get a boolean to determine whether the DB should be created or not.
-    // TODO: send the data source instead of the DB name.
-    // TODO: Check max DB connections, and limit tests accordingly.
     // TODO: clean up and delete the template DB.
 
     global.testWithCleanDB = function (
