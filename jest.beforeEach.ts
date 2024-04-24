@@ -97,16 +97,7 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
     throw new Error(`A DB with the name ${newDbName} already exists!`);
   } else {
     console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
-    // if (otherActionOnTemplateDb) {
-    //   console.log(`waiting - ${newDbName}`)
-    //   await otherActionOnTemplateDb;
-    //   console.log(`waited - ${newDbName}`)
-    // }
-    // otherActionOnTemplateDb = new Promise(async (resolve) => {
     await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
-    //   otherActionOnTemplateDb = undefined;
-    //   return resolve();
-    // });
   }
 }
 
@@ -133,7 +124,6 @@ async function deleteDb(dataSource: DataSource, dbName: string) {
 function replaceTestGlobalFunction() {
   try {
     const originalTestFn = global.test;
-    // TODO: clean up and delete the template DB.
 
     global.testWithCleanDB = function (
       name: string,
