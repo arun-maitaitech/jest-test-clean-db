@@ -111,7 +111,7 @@ module.exports = {
   // projects: undefined,
 
   // Use this configuration option to add custom reporters to Jest
-  //*
+  /*
   reporters: [
     [
       'jest-silent-reporter',

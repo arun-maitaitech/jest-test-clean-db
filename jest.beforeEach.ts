@@ -179,24 +179,11 @@ function replaceTestGlobalFunction() {
         return voidResult;
       };
 
-      // Call the actual Jest's test function with the validated test name and test function
+      // Call the actual Jest's test function along with the (validated) test name and test function
       return originalTestFn(name, asyncFn, timeout);
     };
   } catch (e) {
-    console.error('eeee=' + e);
+    console.error(e);
   }
 }
 replaceTestGlobalFunction();
-
-// beforeEach(async function(this: jest.Lifecycle) {
-//   // NockHandler.runBeforeEachTest(true);
-//   // await DbOrmTestingInstance.resetDbConnection();
-
-//   // const testName = this.currentTest.fullName;
-//   // console.log(`Test name: ${this}=====  ${this}`);
-//   // console.log(this);
-// });
-
-// afterEach(() => {
-//   // NockHandler.runWhenEachTestIsOver();
-// });

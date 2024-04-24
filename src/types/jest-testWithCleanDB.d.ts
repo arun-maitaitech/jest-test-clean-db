@@ -1,3 +1,4 @@
+// spell-checker:ignore typeorm
 import { DataSource } from 'typeorm';
 
 declare global {
