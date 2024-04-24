@@ -1,7 +1,8 @@
-// import { DbOrmTestingInstance } from './src/db/DbOrmTestingInstance';
-import utils from './src/utils/utils';
+// spell-checker:ignore typeorm datname
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
-import { DataSource, DataSourceOptions } from "typeorm";
+import utils from './src/utils/utils';
 
 const MINUTE_IN_MILLISECOND = 1000 * 60; // A minute in milliseconds
 const timeoutForManualTesting = process.env.MANUAL_TESTING ? 9999 : 1;
@@ -15,12 +16,9 @@ const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js
 // console.log('LOCATION_OF_MIGRATION_JS_FILES=' + LOCATION_OF_MIGRATION_JS_FILES)
 const DEFAULT_PORT = 5432;
 
-let otherActionOnTemplateDb: Promise<void> | undefined = undefined;
-
-let dsOptions: DataSourceOptions = {
+let dsOptions: PostgresConnectionOptions = {
   type: 'postgres',
-  entities: [
-  ],
+  entities: [],
   migrations: [LOCATION_OF_MIGRATION_JS_FILES],
   migrationsRun: false,
   logging: utils.isReallyTrue(process.env.POSTGRESQL_DEBUGGING),
@@ -37,16 +35,15 @@ let dsOptions: DataSourceOptions = {
   port: DEFAULT_PORT,
 };
 
-const TEMPLATE_DB_NAME = new Date().toISOString().substring(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
+const TEMPLATE_DB_NAME = new Date()
+  .toISOString()
+  .substring(0, 23)
+  .replace(/[-T:\.]/g, '');
 const mainDataSource = new DataSource(dsOptions);
 let isInit = false;
 
-
 async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
-
-  const result = await dataSource.query(
-    `SELECT 1 FROM pg_database WHERE datname = '${dbName}'`
-  );
+  const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
 
   if (result.length) {
     throw new Error(`A DB with the name ${dbName} already exists!`);
@@ -68,8 +65,7 @@ async function initDB() {
 
     const newDsOptions: DataSourceOptions = {
       type: 'postgres',
-      entities: [
-      ],
+      entities: [],
       migrations: [LOCATION_OF_MIGRATION_JS_FILES],
       migrationsRun: false,
       logging: utils.isReallyTrue(process.env.POSTGRESQL_DEBUGGING),
@@ -95,10 +91,7 @@ async function initDB() {
 }
 
 async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
-
-  const result = await dataSource.query(
-    `SELECT 1 FROM pg_database WHERE datname = '${newDbName}'`
-  );
+  const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${newDbName}'`);
 
   if (result.length) {
     throw new Error(`A DB with the name ${newDbName} already exists!`);
@@ -117,67 +110,85 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
   }
 }
 
-
 async function deleteDb(dataSource: DataSource, dbName: string) {
-
   const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
   await dataSource.query(strSql);
 
-  const result2 = await dataSource.query(
-    `SELECT 1 FROM pg_database WHERE datname = '${dbName}%'`
-  );
+  const result2 = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}%'`);
   if (result2.length) {
     throw new Error(`A DB with the prefix ${dbName} still exists!`);
   }
 }
 
-
+/**
+ * The reasons I'm replacing the `test()` function, instead of using the `beforeEach` function, is that unfortunately accessing the
+ * test name directly within the `beforeEach` function located in a file listed under the "setupFilesAfterEnv" key of the Jest config
+ * file is not possible, and I need it for the DB name.
+ *
+ * The reason I'm not running `replaceTestGlobalFunction` in the `beforeAll` function:
+ * * The `beforeAll` function in `*.test.ts` files: Because the we'll have to remember mentioning it per file, instead once in central location.
+ * * The `beforeAll` function in this file: Because the `describe()` and `test()` functions (not the test functions that are given to them as input) run before it.
+ */
 function replaceTestGlobalFunction() {
   try {
-    const originalTest = global.test;
-    const tmp: jest.It = Object.assign(function (name: string, fn: (dbNameForThisTest: string) => void, timeout?: number) {
-      const describeName = expect.getState().currentDescribeBlock || '';
+    const originalTestFn = global.test;
+    // TODO: get a boolean to determine whether the DB should be created or not.
+    // TODO: send the data source instead of the DB name.
+    // TODO: Check max DB connections, and limit tests accordingly.
+    // TODO: clean up and delete the template DB.
+
+    global.testWithCleanDB = function (
+      name: string,
+      fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
+      timeout?: number
+    ) {
+      const describeBlockName = expect.getState().currentDescribeBlock || '';
 
       if (MAX_TEST_NAME_LENGTH < name.length) {
-        throw new Error(`Test name (${describeName ? `${describeName} > ` : ``}${name}) exceeds the maximum length of ${MAX_TEST_NAME_LENGTH} characters.`);
+        throw new Error(
+          `Test name (${
+            describeBlockName ? `${describeBlockName} > ` : ``
+          }${name}) exceeds the maximum length of ${MAX_TEST_NAME_LENGTH} characters.`
+        );
       }
 
       if (uniqueTestNames.includes(name)) {
-        throw new Error(`Test name (${describeName ? `${describeName} > ` : ``}${name}) is not unique in this project. This might cause it to use the DB of another test`);
+        throw new Error(
+          `Test name (${
+            describeBlockName ? `${describeBlockName} > ` : ``
+          }${name}) is not unique in this project. This might cause it to use the DB of another test`
+        );
       } else {
         uniqueTestNames.push(name);
       }
 
       const asyncFn: Parameters<typeof global.test>[1] = async function () {
+        /**
+         * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
+         */
         await initDB();
+
         const dbNameForThisTest = `${TEMPLATE_DB_NAME}-${name}`;
-        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, TEMPLATE_DB_NAME)
+        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, TEMPLATE_DB_NAME);
         let voidResult: void = undefined;
-        let error: Error | undefined = undefined;
-        try {
-          voidResult = fn(dbNameForThisTest);
-        } catch (e) {
-          error=e;
-        }
+        const dbForThisTest = new DataSource({
+          ...dsOptions,
+          database: dbNameForThisTest,
+        });
+        await dbForThisTest.initialize();
+        voidResult = fn({ dbNameForThisTest, dbDataSource: dbForThisTest });
+        await closeConnection(dbForThisTest);
         await deleteDb(mainDataSource, dbNameForThisTest);
-        if (error) {
-          throw error;
-        }
         return voidResult;
-      }
+      };
 
       // Call the actual Jest's test function with the validated test name and test function
-      return originalTest(name, asyncFn, timeout);
-    });
-
-    // console.log('11111=' + global.test);
-    global.test = tmp;
-    // console.log('22222=' + global.test);
+      return originalTestFn(name, asyncFn, timeout);
+    };
   } catch (e) {
     console.error('eeee=' + e);
   }
 }
-
 replaceTestGlobalFunction();
 
 // beforeEach(async function(this: jest.Lifecycle) {

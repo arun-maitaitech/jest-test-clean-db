@@ -1,9 +1,19 @@
 describe('describe', () => {
-  test('fail', (dbNameForThisTest) => {
-    expect(dbNameForThisTest).toBeFalsy()
+  test('fail', () => {
+    expect(true).toBeFalsy();
   });
 
-  test('success', (dbNameForThisTest) => {
-    expect(dbNameForThisTest).toBeTruthy()
+  test('success', () => {
+    debugger;
+    expect(1).toBeTruthy();
+  });
+
+  const TEST_NAME_WITH_DB = 'successDB';
+  testWithCleanDB(TEST_NAME_WITH_DB, ({ dbNameForThisTest, dbDataSource }) => {
+    debugger;
+    expect(dbNameForThisTest).toMatch(new RegExp(`^\\d{17}-${TEST_NAME_WITH_DB}$`));
+    expect(dbDataSource).toHaveProperty('isInitialized', true);
+    expect(dbDataSource).toHaveProperty('isConnected', true);
+    expect(dbDataSource.options.database).toMatch(dbNameForThisTest);
   });
 });
