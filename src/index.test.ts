@@ -36,5 +36,18 @@ describe('Main describe', () => {
       // The test should fail before even starting - because the name is too long.
       expect(true).toBeTruthy();
     });
+
+    const TEST_WITH_THE_SAME_NAME = 'TEST_WITH_THE_SAME_NAME';
+    testWithCleanDB(TEST_WITH_THE_SAME_NAME, ({ dbNameForThisTest, dbDataSource }) => {
+      // The test should succeed, as it's the first test with the same name
+      expect(true).toBeTruthy();
+    });
+    describe('Even if it\'s nested in another describe block', () => {
+
+      testWithCleanDB(TEST_WITH_THE_SAME_NAME, ({ dbNameForThisTest, dbDataSource }) => {
+        // The test should fail, as there's another test with the same name
+        expect(true).toBeTruthy();
+      });
+    });
   });
 });

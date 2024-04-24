@@ -48,7 +48,7 @@ async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
   if (result.length) {
     throw new Error(`A DB with the name ${dbName} already exists!`);
   } else {
-    console.log(`Creating database with name "${dbName}"`);
+    console.log(`Creating main template database with name "${dbName}"`);
     await dataSource.query(`CREATE DATABASE "${dbName}"`);
   }
 }
@@ -96,7 +96,7 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
   if (result.length) {
     throw new Error(`A DB with the name ${newDbName} already exists!`);
   } else {
-    console.log(`Creating a database with the name "${newDbName}" from template "${templateDbName}"...`);
+    console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
     // if (otherActionOnTemplateDb) {
     //   console.log(`waiting - ${newDbName}`)
     //   await otherActionOnTemplateDb;
@@ -140,27 +140,27 @@ function replaceTestGlobalFunction() {
       fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
       timeout?: number
     ) {
-      const describeBlockName = expect.getState().currentDescribeBlock || '';
-
-      if (MAX_TEST_NAME_LENGTH < name.length) {
-        throw new Error(
-          `The test's name (${
-            describeBlockName ? `${describeBlockName} > ` : ``
-          }${name}) has ${name.length} characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB name's length is limited`
-        );
-      }
-
-      if (uniqueTestNames.includes(name)) {
-        throw new Error(
-          `Test name (${
-            describeBlockName ? `${describeBlockName} > ` : ``
-          }${name}) is not unique in this project. This might cause it to use the DB of another test`
-        );
-      } else {
-        uniqueTestNames.push(name);
-      }
-
       const asyncFn: Parameters<typeof global.test>[1] = async function () {
+        const describeBlockName = expect.getState().currentDescribeBlock || '';
+
+        if (MAX_TEST_NAME_LENGTH < name.length) {
+          throw new Error(
+            `The test's name (${describeBlockName ? `${describeBlockName} > ` : ``}${name}) has ${
+              name.length
+            } characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB name's length is limited`
+          );
+        }
+
+        if (uniqueTestNames.includes(name)) {
+          throw new Error(
+            `Test name (${
+              describeBlockName ? `${describeBlockName} > ` : ``
+            }${name}) is not unique in this project. This might cause it to use the same DB of another test`
+          );
+        } else {
+          uniqueTestNames.push(name);
+        }
+
         /**
          * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
          */
@@ -169,15 +169,26 @@ function replaceTestGlobalFunction() {
         const dbNameForThisTest = `${TEMPLATE_DB_NAME}-${name}`;
         await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, TEMPLATE_DB_NAME);
         let voidResult: void = undefined;
+        let errorFromTestFn: Error | null = null;
         const dbForThisTest = new DataSource({
           ...dsOptions,
           database: dbNameForThisTest,
         });
         await dbForThisTest.initialize();
-        voidResult = fn({ dbNameForThisTest, dbDataSource: dbForThisTest });
-        await closeConnection(dbForThisTest);
-        await deleteDb(mainDataSource, dbNameForThisTest);
-        return voidResult;
+        try {
+          voidResult = fn({ dbNameForThisTest, dbDataSource: dbForThisTest });
+        } catch (_errFromTestFn) {
+          errorFromTestFn = _errFromTestFn;
+        } finally {
+          await closeConnection(dbForThisTest);
+          await deleteDb(mainDataSource, dbNameForThisTest);
+        }
+
+        if (errorFromTestFn) {
+          throw errorFromTestFn;
+        } else {
+          return voidResult;
+        }
       };
 
       // Call the actual Jest's test function along with the (validated) test name and test function
