@@ -8,7 +8,7 @@ class CreateInitialTables1660306612822 {
     async up(queryRunner) {
         await queryRunner.query(`CREATE TABLE "Industry" ("id" SERIAL NOT NULL, "industryName" character varying NOT NULL, CONSTRAINT "PK_63f1b157e1b38646de8686ffb85" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "EntityUnit" ("entityUnitInternalID" SERIAL NOT NULL, "address" character varying NOT NULL, "city" character varying NOT NULL, "zipCode" integer NOT NULL, "phoneNumber" character varying NOT NULL, "email" character varying NOT NULL, "notes" character varying NOT NULL, "industryID" integer)`);
-        await queryRunner.query(`CREATE TABLE "Version" ("versionID" SERIAL NOT NULL, "description" character varying NOT NULL, CONSTRAINT "PK_5c667beaae1ba3beba1aed1ba42" PRIMARY KEY ("versionID"))`);
+        await queryRunner.query(`CREATE TABLE "Version" ("versionID" SERIAL NOT NULL, "description" character varying NOT NULL, CONSTRAINT "PK_5c667bea1ae1ba3be1ba1aed1ba42" PRIMARY KEY ("versionID"))`);
     }
     async down(queryRunner) {
     }

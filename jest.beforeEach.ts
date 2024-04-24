@@ -96,7 +96,7 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
   if (result.length) {
     throw new Error(`A DB with the name ${newDbName} already exists!`);
   } else {
-    console.log(`Creating database with name "${newDbName}" from template "${templateDbName}"`);
+    console.log(`Creating a database with the name "${newDbName}" from template "${templateDbName}"...`);
     // if (otherActionOnTemplateDb) {
     //   console.log(`waiting - ${newDbName}`)
     //   await otherActionOnTemplateDb;
@@ -111,6 +111,7 @@ async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, tem
 }
 
 async function deleteDb(dataSource: DataSource, dbName: string) {
+  console.log(`Deleting the database with the name "${dbName}"...`);
   const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
   await dataSource.query(strSql);
 
@@ -143,9 +144,9 @@ function replaceTestGlobalFunction() {
 
       if (MAX_TEST_NAME_LENGTH < name.length) {
         throw new Error(
-          `Test name (${
+          `The test's name (${
             describeBlockName ? `${describeBlockName} > ` : ``
-          }${name}) exceeds the maximum length of ${MAX_TEST_NAME_LENGTH} characters.`
+          }${name}) has ${name.length} characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB name's length is limited`
         );
       }
 
