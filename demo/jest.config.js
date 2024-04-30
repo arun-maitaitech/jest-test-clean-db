@@ -155,7 +155,7 @@ module.exports = {
   setupFiles: ['dotenv/config'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ['jest-extended/all', 'jest-test-clean-db/dist/setupFilesAfterEnv'],
+  setupFilesAfterEnv: ['jest-test-clean-db/dist/setupFilesAfterEnv'],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,
@@ -221,5 +221,5 @@ module.exports = {
   // watchman: true,
 
   // Default timeout of a test in milliseconds.
-  testTimeout: 20000,
+  // testTimeout: 20000,
 };

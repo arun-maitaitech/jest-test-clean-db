@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 
-import { baseDataSourceOptions } from './baseDataSourceOptions';
-
 dotenv.config();
+
+import { baseDataSourceOptions } from './baseDataSourceOptions';
 
 let mainDataSource: DataSource | null = null;
 
