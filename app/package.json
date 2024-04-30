@@ -1,6 +1,6 @@
 {
   "name": "jest-test-clean-db",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "files": [
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "ts-jest": "^26.4.4",
-    "np": "^10.0.5",
+    "np": "^7.6.3",
     "@types/node": "^14.6.4",
     "jest-silent-reporter": "^0.5.0",
     "dotenv": "^16.0.1",
