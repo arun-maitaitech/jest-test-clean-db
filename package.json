@@ -9,7 +9,7 @@
   "scripts": {
     "release": "pnpm --filter ./app run release",
     "task:typescript": "pnpm --filter ./app run task:typescript",
-    "test": "pnpm --parallel run test",
+    "test": "pnpm run task:typescript && pnpm --parallel run test",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
