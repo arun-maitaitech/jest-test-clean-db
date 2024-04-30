@@ -6,8 +6,9 @@
   "scripts": {
     "task:test_OLD": "jest --runInBand --detectOpenHandles --forceExit",
     "task:test": "jest --detectOpenHandles --forceExit",
-    "test": "npm run task:test",
-    "start": "ts-node -r source-map-support/register -r dotenv/config index.ts"
+    "test": "pnpm run task:test",
+    "start": "ts-node -r source-map-support/register -r dotenv/config index.ts",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "jest-silent-reporter": "^0.5.0",
