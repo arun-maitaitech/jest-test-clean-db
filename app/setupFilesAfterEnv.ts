@@ -3,50 +3,19 @@ import { DataSource } from 'typeorm';
 
 import { getTemplateDbName } from './templateDbNameGenerator_singleton';
 import { closeConnection, createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
-
-// const MINUTE_IN_MILLISECOND = 1000 * 60; // A minute in milliseconds
-// const timeoutForManualTesting = process.env.MANUAL_TESTING ? 9999 : 1;
-// jest.setTimeout(timeoutForManualTesting * MINUTE_IN_MILLISECOND); // in milliseconds
+import { getMainDataSource } from './mainDataSource_singleton';
+import { baseDataSourceOptions } from './baseDataSourceOptions';
 
 const MAX_TEST_NAME_LENGTH = 40;
 const uniqueTestNames: Array<string> = [];
 
-const distFolder = __dirname;
-const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js,ts}';
-// console.log('LOCATION_OF_MIGRATION_JS_FILES=' + LOCATION_OF_MIGRATION_JS_FILES)
-const DEFAULT_PORT = 5432;
-
-let baseDataSourceOptions: PostgresConnectionOptions = {
-  type: 'postgres',
-  entities: [],
-  migrations: [LOCATION_OF_MIGRATION_JS_FILES],
-  migrationsRun: false,
-  logging: Boolean(process.env.POSTGRESQL_DEBUGGING),
-  // schema: options?.schema || DEFAULT_SCHEMA,
-  // dropSchema,
-  synchronize: false,
-  // extra: {
-  //   connectionLimit: utils.isProd() ? 10 : 5,
-  // },
-  host: process.env.TEST_POSTGRESQL_HOSTNAME || '',
-  username: process.env.TEST_POSTGRESQL_USERNAME || '',
-  password: process.env.TEST_POSTGRESQL_PASSWORD || '',
-  port: DEFAULT_PORT,
-
-  // database: // Missing on purpose!
-};
-
-const mainDataSource = new DataSource({
-  ...baseDataSourceOptions,
-  database: process.env.TEST_POSTGRESQL_DB_NAME || '',
-});
 let isInit = false;
 
 const templateDbName = getTemplateDbName();
 
 async function initDB() {
   if (!isInit) {
-    await mainDataSource.initialize();
+    const mainDataSource = await getMainDataSource();
     await createNewDbOrThrow(mainDataSource, templateDbName);
     // await closeConnection(mainDataSource);
 
@@ -104,6 +73,8 @@ function replaceTestGlobalFunction() {
          * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
          */
         await initDB();
+
+        const mainDataSource = await getMainDataSource();
 
         const dbNameForThisTest = `${templateDbName}-${name}`;
         await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, templateDbName);

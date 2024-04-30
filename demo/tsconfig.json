@@ -1,5 +1,4 @@
 {
-  "ln": 1,
   "compilerOptions": {
     "experimentalDecorators": true,
     "module": "commonjs",
@@ -21,26 +20,12 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "baseUrl": ".",
-    "typeRoots": [
-      "./src/types",
-      "./node_modules/@types"
-    ],
+    "declaration": true,
+    "baseUrl": "app",
+    // "typeRoots": ["./node_modules/**/*"],
     "paths": {
-      "*": [
-        "node_modules/*"
-      ]
-    },
-    "rootDir": "./"
+      "*": ["node_modules/*"]
+    }
   },
-  "include": [
-    "src/**/*",
-    "jest.config.ts",
-    // "jest.beforeAll.ts",
-    "jest.beforeEach.ts",
-    "jest.afterAll.ts",
-    "ormConfig.js",
-    "src/types/jest-extended.d.ts",
-  ],
-  "files": ["src/types/jest-extended.d.ts"]
+  // "include": ["./*"],
 }

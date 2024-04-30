@@ -1,3 +1,5 @@
+import 'jest-test-clean-db';
+
 describe('Main describe', () => {
   describe('No DB involved', () => {
     test('Test which fails', () => {

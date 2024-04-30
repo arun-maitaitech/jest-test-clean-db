@@ -33,7 +33,7 @@ module.exports = {
   // coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '/src/db/migrations/'],
+  // coveragePathIgnorePatterns: ['/node_modules/', '/src/db/migrations/'],
 
   // Indicates which provider should be used to instrument code for coverage
   // coverageProvider: "babel",
@@ -69,7 +69,7 @@ module.exports = {
   // globalSetup: './jest.beforeAll.ts',
 
   // A path to a module which exports an async function that is triggered once after all test suites
-  globalTeardown: './jest.afterAll.ts',
+  globalTeardown:  'jest-test-clean-db/dist/globalTeardown',
 
   // A set of global variables that need to be available in all test environments
   // globals: {},
@@ -146,7 +146,7 @@ module.exports = {
   // rootDir: undefined,
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ['<rootDir>/src'],
+  roots: ['./'],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
@@ -155,7 +155,7 @@ module.exports = {
   setupFiles: ['dotenv/config'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ['jest-extended/all', './jest.beforeEach.ts'],
+  setupFilesAfterEnv: ['jest-extended/all', 'jest-test-clean-db/dist/setupFilesAfterEnv'],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,
