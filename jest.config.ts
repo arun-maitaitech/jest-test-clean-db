@@ -19,18 +19,18 @@ module.exports = {
   // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  // collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    // "dist/**/*.{js,jsx,ts,tsx}",
-    '!**/node_modules/**',
-    '!**.d.ts',
-  ],
+  // collectCoverageFrom: [
+  //   'src/**/*.{js,jsx,ts,tsx}',
+  //   // "dist/**/*.{js,jsx,ts,tsx}",
+  //   '!**/node_modules/**',
+  //   '!**.d.ts',
+  // ],
 
   // The directory where Jest should output its coverage files
-  coverageDirectory: 'coverage',
+  // coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: ['/node_modules/', '/src/db/migrations/'],
@@ -46,15 +46,15 @@ module.exports = {
   //   "clover"
   // ],
 
-  // An object that configures minimum threshold enforcement for coverage results
-  coverageThreshold: {
-    global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
-    },
-  },
+  // // An object that configures minimum threshold enforcement for coverage results
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 0,
+  //     functions: 0,
+  //     lines: 0,
+  //     statements: 0,
+  //   },
+  // },
 
   // A path to a custom dependency extractor
   // dependencyExtractor: undefined,
@@ -65,8 +65,8 @@ module.exports = {
   // Force coverage collection from ignored files using an array of glob patterns
   // forceCoverageMatch: [],
 
-  // A path to a module which exports an async function that is triggered once before all test suites
-  globalSetup: './jest.beforeAll.ts',
+  // // A path to a module which exports an async function that is triggered once before all test suites
+  // globalSetup: './jest.beforeAll.ts',
 
   // A path to a module which exports an async function that is triggered once after all test suites
   globalTeardown: './jest.afterAll.ts',

@@ -1,12 +1,12 @@
-// spell-checker:ignore typeorm datname
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 
-import utils from './src/utils/utils';
+import { getTemplateDbName } from './templateDbNameGenerator_singleton';
+import { closeConnection, createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
 
-const MINUTE_IN_MILLISECOND = 1000 * 60; // A minute in milliseconds
-const timeoutForManualTesting = process.env.MANUAL_TESTING ? 9999 : 1;
-jest.setTimeout(timeoutForManualTesting * MINUTE_IN_MILLISECOND); // in milliseconds
+// const MINUTE_IN_MILLISECOND = 1000 * 60; // A minute in milliseconds
+// const timeoutForManualTesting = process.env.MANUAL_TESTING ? 9999 : 1;
+// jest.setTimeout(timeoutForManualTesting * MINUTE_IN_MILLISECOND); // in milliseconds
 
 const MAX_TEST_NAME_LENGTH = 40;
 const uniqueTestNames: Array<string> = [];
@@ -16,12 +16,12 @@ const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js
 // console.log('LOCATION_OF_MIGRATION_JS_FILES=' + LOCATION_OF_MIGRATION_JS_FILES)
 const DEFAULT_PORT = 5432;
 
-let dsOptions: PostgresConnectionOptions = {
+let baseDataSourceOptions: PostgresConnectionOptions = {
   type: 'postgres',
   entities: [],
   migrations: [LOCATION_OF_MIGRATION_JS_FILES],
   migrationsRun: false,
-  logging: utils.isReallyTrue(process.env.POSTGRESQL_DEBUGGING),
+  logging: Boolean(process.env.POSTGRESQL_DEBUGGING),
   // schema: options?.schema || DEFAULT_SCHEMA,
   // dropSchema,
   synchronize: false,
@@ -31,85 +31,34 @@ let dsOptions: PostgresConnectionOptions = {
   host: process.env.TEST_POSTGRESQL_HOSTNAME || '',
   username: process.env.TEST_POSTGRESQL_USERNAME || '',
   password: process.env.TEST_POSTGRESQL_PASSWORD || '',
-  database: process.env.TEST_POSTGRESQL_DB_NAME || '',
   port: DEFAULT_PORT,
+
+  // database: // Missing on purpose!
 };
 
-const TEMPLATE_DB_NAME = new Date()
-  .toISOString()
-  .substring(0, 23)
-  .replace(/[-T:\.]/g, '');
-const mainDataSource = new DataSource(dsOptions);
+const mainDataSource = new DataSource({
+  ...baseDataSourceOptions,
+  database: process.env.TEST_POSTGRESQL_DB_NAME || '',
+});
 let isInit = false;
 
-async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
-  const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
-
-  if (result.length) {
-    throw new Error(`A DB with the name ${dbName} already exists!`);
-  } else {
-    console.log(`Creating main template database with name "${dbName}"`);
-    await dataSource.query(`CREATE DATABASE "${dbName}"`);
-  }
-}
-
-async function closeConnection(dataSource: DataSource) {
-  await dataSource.destroy();
-}
+const templateDbName = getTemplateDbName();
 
 async function initDB() {
   if (!isInit) {
     await mainDataSource.initialize();
-    await createNewDbOrThrow(mainDataSource, TEMPLATE_DB_NAME);
+    await createNewDbOrThrow(mainDataSource, templateDbName);
     // await closeConnection(mainDataSource);
 
-    const newDsOptions: DataSourceOptions = {
-      type: 'postgres',
-      entities: [],
-      migrations: [LOCATION_OF_MIGRATION_JS_FILES],
-      migrationsRun: false,
-      logging: utils.isReallyTrue(process.env.POSTGRESQL_DEBUGGING),
-      // schema: options?.schema || DEFAULT_SCHEMA,
-      // dropSchema,
-      synchronize: false,
-      // extra: {
-      //   connectionLimit: utils.isProd() ? 10 : 5,
-      // },
-      host: process.env.TEST_POSTGRESQL_HOSTNAME || '',
-      username: process.env.TEST_POSTGRESQL_USERNAME || '',
-      password: process.env.TEST_POSTGRESQL_PASSWORD || '',
-      database: TEMPLATE_DB_NAME,
-      port: DEFAULT_PORT,
-    };
-
-    const templateDataSource = new DataSource(newDsOptions);
+    const templateDataSource = new DataSource({
+      ...baseDataSourceOptions,
+      database: templateDbName,
+    });
     await templateDataSource.initialize();
     await templateDataSource.runMigrations();
     await closeConnection(templateDataSource);
   }
   isInit = true;
-}
-
-async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
-  const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${newDbName}'`);
-
-  if (result.length) {
-    throw new Error(`A DB with the name ${newDbName} already exists!`);
-  } else {
-    console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
-    await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
-  }
-}
-
-async function deleteDb(dataSource: DataSource, dbName: string) {
-  console.log(`Deleting the database with the name "${dbName}"...`);
-  const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
-  await dataSource.query(strSql);
-
-  const result2 = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}%'`);
-  if (result2.length) {
-    throw new Error(`A DB with the prefix ${dbName} still exists!`);
-  }
 }
 
 /**
@@ -137,7 +86,7 @@ function replaceTestGlobalFunction() {
           throw new Error(
             `The test's name (${describeBlockName ? `${describeBlockName} > ` : ``}${name}) has ${
               name.length
-            } characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB name's length is limited`
+            } characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB software limits the DB name's length`
           );
         }
 
@@ -156,12 +105,12 @@ function replaceTestGlobalFunction() {
          */
         await initDB();
 
-        const dbNameForThisTest = `${TEMPLATE_DB_NAME}-${name}`;
-        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, TEMPLATE_DB_NAME);
+        const dbNameForThisTest = `${templateDbName}-${name}`;
+        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, templateDbName);
         let voidResult: void = undefined;
         let errorFromTestFn: Error | null = null;
         const dbForThisTest = new DataSource({
-          ...dsOptions,
+          ...baseDataSourceOptions,
           database: dbNameForThisTest,
         });
         await dbForThisTest.initialize();

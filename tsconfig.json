@@ -35,9 +35,8 @@
   },
   "include": [
     "src/**/*",
-    "gulpfile.ts",
     "jest.config.ts",
-    "jest.beforeAll.ts",
+    // "jest.beforeAll.ts",
     "jest.beforeEach.ts",
     "jest.afterAll.ts",
     "ormConfig.js",

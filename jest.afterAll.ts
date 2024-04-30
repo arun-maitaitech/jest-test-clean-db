@@ -1,6 +1,7 @@
-// import { DbOrmTestingInstance } from './src/db/DbOrmTestingInstance';
+import {getTemplateDbName} from './templateDbNameGenerator_singleton';
 
 export default async () => {
-  // await DbOrmTestingInstance.resetDbConnection();
+  const templateDbName = getTemplateDbName();
+  console.log(templateDbName)
   return;
 };
