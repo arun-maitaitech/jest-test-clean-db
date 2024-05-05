@@ -6,7 +6,8 @@
   "files": [
     "dist/**/*",
     "setupFilesAfterEnv.js",
-    "globalTeardown.js"
+    "globalTeardown.js",
+    "license.txt"
   ],
   "scripts": {
     "task:release": "dotenv -e .env np -- --no-2fa",
