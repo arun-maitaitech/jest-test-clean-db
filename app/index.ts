@@ -5,5 +5,5 @@ declare global {
     name: string,
     fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
     timeout?: number
-  ) => void | undefined;
+  ) => void | undefined | Promise<void | undefined>;
 }
