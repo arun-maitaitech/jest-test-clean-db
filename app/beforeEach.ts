@@ -41,7 +41,7 @@ async function initDB() {
  */
 function ensureGlobalFunctions() {
   try {
-    const unwrap = async (name: string, fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void) => {
+    const unwrap = (name: string, fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void) => {
       /**
        * Validation of the test name
        */
@@ -104,26 +104,24 @@ function ensureGlobalFunctions() {
       return underlyingFunctionToReturn;
     };
 
-    const _testWithCleanDB = async (
+    const _testWithCleanDB = (
       name: string,
       fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
       timeout?: number
     ) => {
       // Call the actual Jest's *test* function along with the (validated) test name and test function
-      const unwrappedFunction = await unwrap(name, fn);
-      return global.test(name, unwrappedFunction, timeout);
+      return global.test(name, unwrap(name, fn), timeout);
     };
 
     global.testWithCleanDB = global.testWithCleanDB || _testWithCleanDB;
 
-    const _describeWithCleanDB = async (
+    const _describeWithCleanDB = (
       name: number | string | Function | jest.FunctionLike,
       fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void
     ) => {
       // Call the actual Jest's *describe* function along with the (validated) block name and block function
       const _name = typeof name === 'function' || typeof name === 'object' ? name.name : String(name);
-      const unwrappedFunction = await unwrap(_name, fn);
-      return global.describe(name, unwrappedFunction);
+      return global.describe(name, unwrap(_name, fn));
     };
     global.describe_withCleanDb = global.describe_withCleanDb || _describeWithCleanDB;
   } catch (e) {
