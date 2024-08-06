@@ -1,14 +1,21 @@
 import { DataSource } from 'typeorm';
 
-export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
+async function checkIfDbExists(dataSource: DataSource, dbName: string) {
   const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
+  return Boolean(result.length);
+}
 
-  if (result.length) {
-    throw new Error(`A DB with the name ${dbName} already exists!`);
-  } else {
-    console.log(`Creating main template database with name "${dbName}"`);
-    await dataSource.query(`CREATE DATABASE "${dbName}"`);
+async function assertDbDoesNotExist(dataSource: DataSource, dbName: string) {
+  const doesAlreadyExist = await checkIfDbExists(dataSource, dbName);
+  if (doesAlreadyExist) {
+    throw new Error(`jest-test-clean-db.assertDbDoesNotExist - Assertion failed! A DB with the name ${dbName} does exist!`);
   }
+}
+
+export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
+  await assertDbDoesNotExist(dataSource, dbName);
+  console.log(`Creating main template database with name "${dbName}"`);
+  await dataSource.query(`CREATE DATABASE "${dbName}"`);
 }
 
 export async function closeConnection(dataSource: DataSource) {
@@ -16,23 +23,14 @@ export async function closeConnection(dataSource: DataSource) {
 }
 
 export async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
-  const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${newDbName}'`);
-
-  if (result.length) {
-    throw new Error(`A DB with the name ${newDbName} already exists!`);
-  } else {
-    console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
-    await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
-  }
+  await assertDbDoesNotExist(dataSource, newDbName);
+  console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
+  await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
 }
 
 export async function deleteDb(dataSource: DataSource, dbName: string) {
   console.log(`Deleting the database with the name "${dbName}"...`);
   const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
   await dataSource.query(strSql);
-
-  const result2 = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}%'`);
-  if (result2.length) {
-    throw new Error(`A DB with the prefix ${dbName} still exists!`);
-  }
+  await assertDbDoesNotExist(dataSource, dbName);
 }
