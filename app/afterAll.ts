@@ -7,6 +7,11 @@ export default async () => {
   if (wasEverInitialized() && templateDbName) {
     const mainDataSource = await getMainDataSource();
     await deleteDb(mainDataSource, templateDbName);
+
+    console.log(222222222222222);
+    console.log(222222222222222);
+    console.log(222222222222222);
+    console.log(222222222222222);
   }
   return;
 };

@@ -92,6 +92,10 @@ function ensureGlobalFunctions() {
           if (isInit) {
             await closeConnection(dbForThisTest);
             await deleteDb(mainDataSource, dbNameForThisTest);
+            console.log(111111111111111);
+            console.log(111111111111111);
+            console.log(111111111111111);
+            console.log(111111111111111);
           }
         }
 
