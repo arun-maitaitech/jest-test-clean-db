@@ -1,5 +1,7 @@
 import { DataSource } from 'typeorm';
 
+import { consoleDebug } from './utils';
+
 async function checkIfDbExists(dataSource: DataSource, dbName: string) {
   const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
   return Boolean(result.length);
@@ -14,7 +16,7 @@ async function assertDbDoesNotExist(dataSource: DataSource, dbName: string) {
 
 export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
   await assertDbDoesNotExist(dataSource, dbName);
-  console.log(`Creating main template database with name "${dbName}"`);
+  consoleDebug(`Creating main template database with name "${dbName}"`);
   await dataSource.query(`CREATE DATABASE "${dbName}"`);
 }
 
@@ -24,12 +26,12 @@ export async function closeConnection(dataSource: DataSource) {
 
 export async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
   await assertDbDoesNotExist(dataSource, newDbName);
-  console.log(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
+  consoleDebug(`Duplicating a new database with the name "${newDbName}" from template "${templateDbName}"...`);
   await dataSource.query(`CREATE DATABASE "${newDbName}" TEMPLATE "${templateDbName}"`);
 }
 
 export async function deleteDb(dataSource: DataSource, dbName: string) {
-  console.log(`Deleting the database with the name "${dbName}"...`);
+  consoleDebug(`Deleting the database with the name "${dbName}"...`);
   const strSql = `DROP DATABASE IF EXISTS "${dbName}"`;
   await dataSource.query(strSql);
   await assertDbDoesNotExist(dataSource, dbName);
