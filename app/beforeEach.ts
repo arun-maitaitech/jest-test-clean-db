@@ -65,23 +65,23 @@ function ensureGlobalFunctions() {
         uniqueTestNames.push(name);
       }
 
-      /**
-       * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
-       */
-      await initDB();
-
-      const mainDataSource = await getMainDataSource();
-
-      const dbNameForThisTest = `${templateDbName}-${name}`;
-      await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, templateDbName);
-
-      const dbForThisTest = new DataSource({
-        ...baseDataSourceOptions,
-        database: dbNameForThisTest,
-      });
-      await dbForThisTest.initialize();
-
       const underlyingFunctionToReturn = async () => {
+        /**
+         * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
+         */
+        await initDB();
+
+        const mainDataSource = await getMainDataSource();
+
+        const dbNameForThisTest = `${templateDbName}-${name}`;
+        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, templateDbName);
+
+        const dbForThisTest = new DataSource({
+          ...baseDataSourceOptions,
+          database: dbNameForThisTest,
+        });
+        await dbForThisTest.initialize();
+
         let resultOfTheUnderlyingWrappedFunction: void = undefined;
         let errorFromTestFn: Error | null = null;
         try {
