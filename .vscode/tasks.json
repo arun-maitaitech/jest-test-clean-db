@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Release new version",
+      "command": "pnpm run release",
+      "type": "shell",
+      "problemMatcher": []
+    }
+  ]
+}
