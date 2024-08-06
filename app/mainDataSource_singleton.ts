@@ -17,3 +17,7 @@ export async function getMainDataSource() {
   }
   return mainDataSource;
 }
+
+export function wasEverInitialized() {
+  return Boolean(mainDataSource);
+}

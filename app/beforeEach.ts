@@ -89,8 +89,10 @@ function ensureGlobalFunctions() {
         } catch (_errFromTestFn) {
           errorFromTestFn = _errFromTestFn;
         } finally {
-          await closeConnection(dbForThisTest);
-          await deleteDb(mainDataSource, dbNameForThisTest);
+          if (isInit) {
+            await closeConnection(dbForThisTest);
+            await deleteDb(mainDataSource, dbNameForThisTest);
+          }
         }
 
         if (errorFromTestFn) {
