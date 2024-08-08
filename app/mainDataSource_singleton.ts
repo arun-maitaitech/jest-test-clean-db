@@ -6,7 +6,7 @@ dotenv.config();
 import { baseDataSourceOptions } from './baseDataSourceOptions';
 import { createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
 
-class MainDataSource {
+export class MainDataSource {
   private _dataSource: DataSource | null = null;
 
   private async _getDS() {

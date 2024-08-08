@@ -1,5 +1,7 @@
 import { DataSource } from 'typeorm';
 
+import { MainDataSource } from './mainDataSource_singleton';
+
 declare global {
   var testWithCleanDB: (
     name: string,
@@ -11,4 +13,6 @@ declare global {
     name: number | string | Function | jest.FunctionLike,
     fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void
   ) => void;
+
+  var mainDataSource: MainDataSource | undefined;
 }
