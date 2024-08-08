@@ -73,7 +73,7 @@ function ensureGlobalFunctions() {
         const mainDataSource = getMainDataSource();
 
         const dbNameForThisTest = `${templateDbName}-${name}`;
-        mainDataSource.useMainDataSource_toDuplicateDbOrThrow(dbNameForThisTest, templateDbName);
+        await mainDataSource.useMainDataSource_toDuplicateDbOrThrow(dbNameForThisTest, templateDbName);
 
         const dbForThisTest = new DataSource({
           ...baseDataSourceOptions,
