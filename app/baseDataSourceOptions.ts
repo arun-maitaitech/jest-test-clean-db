@@ -1,5 +1,7 @@
-import { DataSource } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const distFolder = __dirname;
 const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js,ts}';

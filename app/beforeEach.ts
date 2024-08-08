@@ -15,9 +15,8 @@ const templateDbName = getTemplateDbName();
 
 async function initDB() {
   if (!isInit) {
-    const mainDataSource = await getMainDataSource();
-    await createNewDbOrThrow(mainDataSource, templateDbName);
-    // await closeConnection(mainDataSource);
+    const mainDataSource = getMainDataSource();
+    await mainDataSource.useMainDataSource_toCreateNewDbOrThrow(templateDbName);
 
     const templateDataSource = new DataSource({
       ...baseDataSourceOptions,
@@ -71,10 +70,10 @@ function ensureGlobalFunctions() {
          */
         await initDB();
 
-        const mainDataSource = await getMainDataSource();
+        const mainDataSource = getMainDataSource();
 
         const dbNameForThisTest = `${templateDbName}-${name}`;
-        await duplicateDbOrThrow(mainDataSource, dbNameForThisTest, templateDbName);
+        mainDataSource.useMainDataSource_toDuplicateDbOrThrow(dbNameForThisTest, templateDbName);
 
         const dbForThisTest = new DataSource({
           ...baseDataSourceOptions,
@@ -91,7 +90,7 @@ function ensureGlobalFunctions() {
         } finally {
           if (isInit) {
             await closeConnection(dbForThisTest);
-            await deleteDb(mainDataSource, dbNameForThisTest);
+            await mainDataSource.useMainDataSource_toDeleteDb(dbNameForThisTest);
           }
         }
 
