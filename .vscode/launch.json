@@ -20,6 +20,23 @@
       "skipFiles": ["<node_internals>/**"],
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "sourceMaps": true
+    },
+    {
+      "name": "Task:test",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "task:test"],
+      "outputCapture": "std",
+      "env": {
+        "MANUAL_TESTING": "1"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      // "port": 9229,
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true
     }
   ]
 }

@@ -1,10 +1,11 @@
 // import { DataSource } from 'typeorm';
 
+import { getMainDataSource } from './mainDataSource_singleton';
+
 // import { getMainDataSource } from './mainDataSource_singleton';
 
 // const MAX_TEST_NAME_LENGTH = 40;
 // const uniqueTestNames: Array<string> = [];
-
 
 // function ensureGlobalFunctions() {
 //   try {
@@ -97,3 +98,8 @@
 //   }
 // }
 // export default ensureGlobalFunctions;
+
+// Initialize the DB
+export default async () => {
+  await getMainDataSource().createTemplateDB();
+};

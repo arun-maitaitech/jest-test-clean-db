@@ -9,7 +9,8 @@
   "scripts": {
     "release": "pnpm --filter ./app run release",
     "task:typescript": "pnpm --filter ./app run task:typescript",
-    "test": "pnpm run task:typescript && pnpm --parallel run test",
+    "task:test": "pnpm --parallel run test",
+    "test": "pnpm run task:typescript && pnpm run task:test",
     "lint": "tsc --target esnext --module NodeNext --moduleResolution NodeNext eslint.config.ts && eslint . --fix",
     "preinstall": "npx only-allow pnpm"
   },

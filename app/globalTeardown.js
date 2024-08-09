@@ -1,3 +1,3 @@
-const afterAll = require('./dist/afterAll');
-exports.default = afterAll.default;
-module.exports = afterAll.default;
+const globalTeardown = require('./dist/globalTeardown');
+exports.default = globalTeardown.default;
+module.exports = globalTeardown.default;
