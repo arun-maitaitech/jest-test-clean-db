@@ -11,7 +11,6 @@ describe('Main describe', () => {
     });
 
     test('Test which succeeds', () => {
-      // debugger;
       expect(1).toBeTruthy();
     });
   });
@@ -27,7 +26,6 @@ describe('Main describe', () => {
 
     const TEST_NAME_WITH_DB = 'Test which succeeds';
     test_withCleanDB(TEST_NAME_WITH_DB, ({ dbNameForThisTest, dbDataSource }) => {
-      // debugger;
       expect(dbNameForThisTest).toMatch(new RegExp(`^\\d{17}-${TEST_NAME_WITH_DB}$`));
       expect(dbDataSource).toHaveProperty('isInitialized', true);
       expect(dbDataSource).toHaveProperty('isConnected', true);
