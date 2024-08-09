@@ -51,11 +51,12 @@ module.exports = tseslint.config(
       parserOptions: {
         project: true,
       },
-      globals: { ...globals.jest, ...globals.node },
+      globals: { ...globals.jest, ...globals.node, test_withCleanDB: true, describe_withCleanDb: true },
     },
     rules: {
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-inferrable-types': 'off',

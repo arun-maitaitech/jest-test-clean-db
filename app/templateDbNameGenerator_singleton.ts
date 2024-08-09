@@ -5,7 +5,7 @@ export function getTemplateDbName() {
     templateDbName = new Date()
       .toISOString()
       .substring(0, 23)
-      .replace(/[-T:\.]/g, '');
+      .replace(/[-T:.]/g, '');
   }
   return templateDbName;
 }
