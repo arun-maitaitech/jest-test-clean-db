@@ -6,6 +6,12 @@
       "command": "pnpm run release",
       "type": "shell",
       "problemMatcher": []
+    },
+    {
+      "label": "TypeScript - run tsc",
+      "command": "pnpm run task:typescript",
+      "type": "shell",
+      "problemMatcher": []
     }
   ]
 }

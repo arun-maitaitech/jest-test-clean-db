@@ -1,133 +1,99 @@
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
-import { DataSource } from 'typeorm';
+// import { DataSource } from 'typeorm';
 
-import { getTemplateDbName } from './templateDbNameGenerator_singleton';
-import { closeConnection, createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
-import { getMainDataSource } from './mainDataSource_singleton';
-import { baseDataSourceOptions } from './baseDataSourceOptions';
+// import { getMainDataSource } from './mainDataSource_singleton';
 
-const MAX_TEST_NAME_LENGTH = 40;
-const uniqueTestNames: Array<string> = [];
-
-let isInit = false;
-
-const templateDbName = getTemplateDbName();
-
-global.mainDataSource = getMainDataSource();
+// const MAX_TEST_NAME_LENGTH = 40;
+// const uniqueTestNames: Array<string> = [];
 
 
-async function initDB() {
-  if (!isInit) {
-    const mainDataSource = getMainDataSource();
-    await mainDataSource.useMainDataSource_toCreateNewDbOrThrow(templateDbName);
+// function ensureGlobalFunctions() {
+//   try {
+//     /**
+//      * Wraps a user function with validation and DB setup/teardown logic.
+//      * This function runs in the global environment, and not in the test's environment/virtual machine.
+//      *
+//      * @param {string} testName - The name of the test.
+//      * @param {(dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void} userFn - The user function to be wrapped.
+//      * @return {Promise<void>} - A promise that resolves when the wrapped function completes successfully, or rejects with an error if the wrapped function throws an error.
+//      * @throws {Error} - If the test name exceeds the maximum allowed length or if the test name is not unique in the project.
+//      */
+//     const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void) => {
+//       /**
+//        * Validation of the test name
+//        */
+//       const describeBlockName = expect.getState().currentDescribeBlock || '';
 
-    const templateDataSource = new DataSource({
-      ...baseDataSourceOptions,
-      database: templateDbName,
-    });
-    await templateDataSource.initialize();
-    await templateDataSource.runMigrations();
-    await closeConnection(templateDataSource);
-  }
-  isInit = true;
-}
+//       if (MAX_TEST_NAME_LENGTH < testName.length) {
+//         throw new Error(
+//           `The test's name (${describeBlockName ? `${describeBlockName} > ` : ``}${testName}) has ${
+//             testName.length
+//           } characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB software limits the DB name's length`
+//         );
+//       }
 
-/**
- * The reasons I'm replacing the `test()` function, instead of using the `beforeEach` function, is that unfortunately accessing the
- * test name directly within the `beforeEach` function located in a file listed under the "setupFilesAfterEnv" key of the Jest config
- * file is not possible, and I need it for the DB name.
- *
- * The reason I'm not running `ensureGlobalFunctions` in the `beforeAll` function:
- * * The `beforeAll` function in `*.test.ts` files: Because the we'll have to remember mentioning it per file, instead once in central location.
- * * The `beforeAll` function in this file: Because the `describe()` and `test()` functions (not the test functions that are given to them as input) run before it.
- */
-function ensureGlobalFunctions() {
-  try {
-    const unwrap = (name: string, fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void) => {
-      /**
-       * Validation of the test name
-       */
-      const describeBlockName = expect.getState().currentDescribeBlock || '';
+//       if (uniqueTestNames.includes(testName)) {
+//         throw new Error(
+//           `Test name (${
+//             describeBlockName ? `${describeBlockName} > ` : ``
+//           }${testName}) is not unique in this project. This might cause it to use the same DB of another test`
+//         );
+//       } else {
+//         uniqueTestNames.push(testName);
+//       }
 
-      if (MAX_TEST_NAME_LENGTH < name.length) {
-        throw new Error(
-          `The test's name (${describeBlockName ? `${describeBlockName} > ` : ``}${name}) has ${
-            name.length
-          } characters, which exceeds the allowed length of ${MAX_TEST_NAME_LENGTH} characters. This is important as the DB software limits the DB name's length`
-        );
-      }
+//       const underlyingFunctionToReturn = async () => {
+//         /**
+//          * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `test_withCleanDB` function
+//          */
+//         const mainDataSource = getMainDataSource();
 
-      if (uniqueTestNames.includes(name)) {
-        throw new Error(
-          `Test name (${
-            describeBlockName ? `${describeBlockName} > ` : ``
-          }${name}) is not unique in this project. This might cause it to use the same DB of another test`
-        );
-      } else {
-        uniqueTestNames.push(name);
-      }
+//         const { dbNameForThisTest, dbForThisTest } = await mainDataSource.createTestDb_fromTemplateDB(testName);
 
-      const underlyingFunctionToReturn = async () => {
-        /**
-         * The `initDB` function must be called here, because this is the first place that is "per-test" inside of the `testWithCleanDB` function
-         */
-        await initDB();
+//         let resultOfTheUnderlyingWrappedFunction: void = undefined;
+//         let errorFromTestFn: Error | null = null;
+//         try {
+//           resultOfTheUnderlyingWrappedFunction = userFn({ dbNameForThisTest, dbDataSource: dbForThisTest });
+//         } catch (_errFromTestFn) {
+//           errorFromTestFn = _errFromTestFn;
+//         } finally {
+//           await mainDataSource.closeAndDelete_testDb({ dbNameForThisTest, dbForThisTest });
+//         }
 
-        const mainDataSource = getMainDataSource();
+//         if (errorFromTestFn) {
+//           throw errorFromTestFn;
+//         } else {
+//           return resultOfTheUnderlyingWrappedFunction;
+//         }
+//       };
+//       return underlyingFunctionToReturn;
+//     };
 
-        const dbNameForThisTest = `${templateDbName}-${name}`;
-        await mainDataSource.useMainDataSource_toDuplicateDbOrThrow(dbNameForThisTest, templateDbName);
+//     const _test_withCleanDB = (
+//       testName: string,
+//       userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
+//       timeout?: number
+//     ) => {
+//       // Call the actual Jest's *test* function along with the (validated) test name and test function
+//       return global.test(testName, unwrap(testName, userFn), timeout);
+//     };
 
-        const dbForThisTest = new DataSource({
-          ...baseDataSourceOptions,
-          database: dbNameForThisTest,
-        });
-        await dbForThisTest.initialize();
+//     global.test_withCleanDB = global.test_withCleanDB || _test_withCleanDB;
 
-        let resultOfTheUnderlyingWrappedFunction: void = undefined;
-        let errorFromTestFn: Error | null = null;
-        try {
-          resultOfTheUnderlyingWrappedFunction = fn({ dbNameForThisTest, dbDataSource: dbForThisTest });
-        } catch (_errFromTestFn) {
-          errorFromTestFn = _errFromTestFn;
-        } finally {
-          if (isInit) {
-            await closeConnection(dbForThisTest);
-            await mainDataSource.useMainDataSource_toDeleteDb(dbNameForThisTest);
-          }
-        }
+//     const _describeWithCleanDB = (
+//       testName: number | string | Function | jest.FunctionLike,
+//       userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void
+//     ) => {
+//       // Call the actual Jest's *describe* function along with the (validated) block name and block function
+//       const _testName = typeof testName === 'function' || typeof testName === 'object' ? testName.name : String(testName);
+//       return global.describe(testName, unwrap(_testName, userFn));
+//     };
+//     global.describe_withCleanDb = global.describe_withCleanDb || _describeWithCleanDB;
 
-        if (errorFromTestFn) {
-          throw errorFromTestFn;
-        } else {
-          return resultOfTheUnderlyingWrappedFunction;
-        }
-      };
-      return underlyingFunctionToReturn;
-    };
+//     // Initialize the DB
+//     void getMainDataSource().createTemplateDB();
 
-    const _testWithCleanDB = (
-      name: string,
-      fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
-      timeout?: number
-    ) => {
-      // Call the actual Jest's *test* function along with the (validated) test name and test function
-      return global.test(name, unwrap(name, fn), timeout);
-    };
-
-    global.testWithCleanDB = global.testWithCleanDB || _testWithCleanDB;
-
-    const _describeWithCleanDB = (
-      name: number | string | Function | jest.FunctionLike,
-      fn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void
-    ) => {
-      // Call the actual Jest's *describe* function along with the (validated) block name and block function
-      const _name = typeof name === 'function' || typeof name === 'object' ? name.name : String(name);
-      return global.describe(name, unwrap(_name, fn));
-    };
-    global.describe_withCleanDb = global.describe_withCleanDb || _describeWithCleanDB;
-  } catch (e) {
-    console.error(e);
-  }
-}
-ensureGlobalFunctions();
+//   } catch (e) {
+//     console.error(e);
+//   }
+// }
+// export default ensureGlobalFunctions;

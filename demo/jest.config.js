@@ -65,8 +65,8 @@ module.exports = {
   // Force coverage collection from ignored files using an array of glob patterns
   // forceCoverageMatch: [],
 
-  // // A path to a module which exports an async function that is triggered once before all test suites
-  // globalSetup: './jest.beforeAll.ts',
+  // A path to a module which exports an async function that is triggered once before all test suites
+  // globalSetup: 'jest-test-clean-db/dist/globalSetup',
 
   // A path to a module which exports an async function that is triggered once after all test suites
   globalTeardown:  'jest-test-clean-db/globalTeardown',
@@ -155,7 +155,7 @@ module.exports = {
   setupFiles: ['dotenv/config'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  setupFilesAfterEnv: ['jest-test-clean-db/setupFilesAfterEnv'],
+  // setupFilesAfterEnv: ['jest-test-clean-db/setupFilesAfterEnv'],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,
@@ -221,5 +221,5 @@ module.exports = {
   // watchman: true,
 
   // Default timeout of a test in milliseconds.
-  // testTimeout: 20000,
+  testTimeout: 200000,
 };
