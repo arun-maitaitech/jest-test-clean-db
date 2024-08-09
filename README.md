@@ -122,7 +122,7 @@ In order to avoid such behavior, and to cause everything to work as expected - y
 - [ ] Support MySQL and other DBs
 - [ ] Better test `describe_withCleanDB`
 - [ ] Test if the TypeScript step is really needed
-- [ ] Make the test file work, even when testing the failed tests (maybe output to a file, and compare the file with a pre-defined one)
+- [ ] Make the test file of the demo work, even when testing the failed tests (maybe output to a file, and compare the file with a pre-defined one)
 
 <!--
   TODO:
