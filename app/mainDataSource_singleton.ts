@@ -30,24 +30,25 @@ export class MainDataSource {
    */
   async createTemplateDB(): Promise<void> {
     if (!this._templateCreationPromise) {
-      this._templateCreationPromise = new Promise<void>(async (resolve, reject) => {
-        if (this._templateDbName) {
-          throw new Error('jest-test-clean-db: Template database already created!');
-        }
-        this._templateDbName = getTemplateDbName();
-        const _dataSourceInstance = await this._getDataSource();
-        await createNewDbOrThrow(_dataSourceInstance, this._templateDbName);
-
-        const templateDataSource = new DataSource({
-          ...baseDataSourceOptions,
-          database: this._templateDbName,
+      if (this._templateDbName) {
+        throw new Error('jest-test-clean-db: Template database already created!');
+      }
+      this._templateDbName = getTemplateDbName();
+      this._templateCreationPromise = this._getDataSource()
+        .then((_dataSourceInstance) => createNewDbOrThrow(_dataSourceInstance, this._templateDbName))
+        .then(
+          () =>
+            new DataSource({
+              ...baseDataSourceOptions,
+              database: this._templateDbName,
+            })
+        )
+        .then((templateDataSource) => {
+          return templateDataSource
+            .initialize()
+            .then(() => templateDataSource.runMigrations())
+            .then(() => closeConnection(templateDataSource));
         });
-
-        await templateDataSource.initialize();
-        await templateDataSource.runMigrations();
-        await closeConnection(templateDataSource);
-        return resolve();
-      });
     }
     await this._templateCreationPromise;
   }
@@ -84,7 +85,6 @@ export class MainDataSource {
     await deleteDb(ds, dbNameForThisTest);
   }
   async closeAndDelete_templateDb() {
-
     if (this.wasEverInitialized()) {
       await this._templateCreationPromise;
       const ds = await this._getDataSource();
