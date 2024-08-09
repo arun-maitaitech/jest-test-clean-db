@@ -1,4 +1,15 @@
 {
-  "ignoreWords": ["typeorm", "datname"],
-  "ignorePaths": ["**/node_modules/**", "**/dist/**", "**/*.d.ts", "package*.json"]
+  "ignoreWords": [
+    "typeorm",
+    "datname"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.d.ts",
+    "package*.json"
+  ],
+  "words": [
+    "Shifer"
+  ]
 }
