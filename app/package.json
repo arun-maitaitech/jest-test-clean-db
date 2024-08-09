@@ -16,7 +16,7 @@
     "task:typescript_elaborated": "tsc -sourcemap -incremental --pretty",
     "release": "pnpm run task:typescript && pnpm run task:release",
     "start": "ts-node -r source-map-support/register -r dotenv/config index.ts",
-    "test": "echo Leave this line, as it's required by the 'np' package",
+    "test": "echo Leave this line, as it's required by the np package",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
