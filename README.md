@@ -22,29 +22,7 @@ npm install -D jest-test-clean-db@latest
 
 ## Setup (after installation)
 
-### Step 1: **Types** (skip if not using TypeScript):
-
-In order for the `test_withCleanDB` to be available in TypeScript, add the following file to your `tsconfig.json` file (under the `file` or `include` keys):
-
-```
-/node_modules/jest-test-clean-db/dist/index.d.ts
-```
-
-Assuming you're using TypeScript, without setting up this step properly - you'll get the following error in each run `error TS2304: Cannot find name 'test_withCleanDB'`.
-
-Example:
-
-```json
-// tsconfig.json
-
-{
-  // ...
-
-  "files": ["./node_modules/jest-test-clean-db/dist/index.d.ts"]
-}
-```
-
-### Step 2: **Use the `test_withCleanDB` and `describe_withCleanDB` functions**:
+### Step 1: **Use the `test_withCleanDB` and `describe_withCleanDB` functions**:
 
 Import the `test_withCleanDB` and `describe_withCleanDB` functions instead of `test` and `describe`, and use them wherever you need a clean initialized DB in your test files:
 
@@ -82,7 +60,7 @@ describe_withCleanDB('D2', () => {
 });
 ```
 
-### Step 3: **Env params**:
+### Step 2: **Env params**:
 
 Add the following environment params to reach your testing DB (if this solution doesn't fit your need, leave an issue and let me know):
 
@@ -93,7 +71,7 @@ TEST_POSTGRESQL_USERNAME=
 TEST_POSTGRESQL_PASSWORD=
 ```
 
-### Step 4: **Edit the `jest.config.js` file**:
+### Step 3: **Edit the `jest.config.js` file**:
 
 Add the following values to the following Jest's config file's keys:
 
@@ -115,14 +93,13 @@ In order to avoid such behavior, and to cause everything to work as expected - y
 
 </details>
 
-## Want to help?
+## Wanna help out?
 
-- [ ] Support other ways to connect to the DB (connection string? import details from a file?)
-- [ ] Support other ORMs
-- [ ] Support MySQL and other DBs
-- [ ] Better test `describe_withCleanDB`
-- [ ] Test if the TypeScript step is really needed
-- [ ] Make the test file of the demo work, even when testing the failed tests (maybe output to a file, and compare the file with a pre-defined one)
+- [ ] Add support for other ways to connect to the DB (connection string? import details from a file?).
+- [ ] Add support for other ORMs.
+- [ ] Add support for MySQL and other DBs.
+- [ ] Better test `describe_withCleanDB`.
+- [ ] Make the test file of the repository's demo project work despite testing failed tests (maybe forward the tests' output to a file, and compare the file with a pre-defined one).
 
 <!--
   TODO:
