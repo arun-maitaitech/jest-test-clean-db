@@ -16,7 +16,6 @@ async function assertDbDoesNotExist(dataSource: DataSource, dbName: string) {
 
 export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
   await assertDbDoesNotExist(dataSource, dbName);
-  consoleDebug(`jest-test-clean-db - Creating main template database with name "${dbName}"`);
   await dataSource.query(`CREATE DATABASE "${dbName}"`);
 }
 

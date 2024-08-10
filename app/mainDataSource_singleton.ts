@@ -6,6 +6,7 @@ dotenv.config();
 import { baseDataSourceOptions } from './baseDataSourceOptions';
 import { closeConnection, createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
 import { getTemplateDbName } from './templateDbNameGenerator_singleton';
+import { consoleDebug } from './utils';
 
 export class MainDataSource {
   private _dataSource: DataSource | null = null;
@@ -34,6 +35,7 @@ export class MainDataSource {
         throw new Error('jest-test-clean-db: Template database already created!');
       }
       this._templateDbName = getTemplateDbName();
+      consoleDebug(`jest-test-clean-db - Creating main template database with name "${this._templateDbName}"`);
       this._templateCreationPromise = this._getDataSource()
         .then((_dataSourceInstance) => createNewDbOrThrow(_dataSourceInstance, this._templateDbName))
         .then(
