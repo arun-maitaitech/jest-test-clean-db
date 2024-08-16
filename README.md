@@ -76,7 +76,7 @@ TEST_POSTGRESQL_PASSWORD=
 
 Add the following values to the following Jest's config file's keys:
 
-```json
+```javascript
 // jest.config.js
 {
   // ...
