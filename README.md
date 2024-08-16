@@ -4,6 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/jest-test-clean-db.svg)](https://badge.fury.io/js/jest-test-clean-db)
 [![Downloads](https://img.shields.io/npm/dm/jest-test-clean-db.svg)](https://www.npmjs.com/package/jest-test-clean-db)
+[![GitHub issues](https://img.shields.io/github/issues/Asaf-S/jest-test-clean-db)](https://github.com/Asaf-S/jest-test-clean-db/issues)
 
 This library:
 
