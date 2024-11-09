@@ -6,9 +6,9 @@
 [![Downloads](https://img.shields.io/npm/dm/jest-test-clean-db.svg)](https://www.npmjs.com/package/jest-test-clean-db)
 [![GitHub issues](https://img.shields.io/github/issues/Asaf-S/jest-test-clean-db)](https://github.com/Asaf-S/jest-test-clean-db/issues)
 
-This library:
-
-1. Creates a new empty "template" DB for each `jest` run.
+## Purpose
+For each `jest` run, this library will:
+1. Creates a new empty "template" DB.
 2. Applies the TypeORM migrations files on it.
 3. Make a copy of the "template" DB for each test that uses the `test_withCleanDB` function instead of jest's `test`, and describe block that uses the `describe_withCleanDB` function instead of jest's `describe`.
    The `test_withCleanDB` and `describe_withCleanDB` functions are just wrappers of jest's `test` and `describe` function, to extend them.
