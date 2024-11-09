@@ -48,8 +48,10 @@ export class MainDataSource {
         .then(async (templateDataSource) => {
           await templateDataSource.initialize();
           consoleDebug(`START - Applying migrations on the template database...`);
+          const before = Date.now();
           await templateDataSource.runMigrations();
-          consoleDebug(`FINISHED - Applying migrations on the template database...`);
+          const after = Date.now();
+          consoleDebug(`FINISHED - Applying migrations on the template database... (${(after - before) / 1000} seconds)`);
           return await closeConnection(templateDataSource);
         });
     }
