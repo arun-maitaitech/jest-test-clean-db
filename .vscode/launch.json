@@ -22,7 +22,7 @@
       "sourceMaps": true
     },
     {
-      "name": "Task:test",
+      "name": "Test without build first",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceRoot}",

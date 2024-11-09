@@ -46,7 +46,7 @@ describe('D1', () => {
   });
 });
 
-describe_withCleanDB('D2', () => {
+describe_withCleanDB('D2', ({ dbNameForThisTest, dbDataSource }) => {
   test('T1', () => {
     // Uses the same clean DB as the 'T2' test
     expect(typeof dbNameForThisTest).toEqual('string');
