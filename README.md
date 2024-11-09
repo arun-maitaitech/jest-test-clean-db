@@ -95,6 +95,19 @@ If you just use the functions `test_withCleanDB` and `describe_withCleanDB` - ev
 In order to avoid such behavior, and to cause everything to work as expected - you need to add the following values to the following Jest's config file's keys:
 
 </details>
+<details>
+  <summary>Having problems with this step? Click to read more...</summary>
+
+The `globalSetup` key accept only string, this is why you can't add an array as its value.
+
+It means that this is not possible: `"globalSetup": ["./localGlobalSetupFile", "jest-test-clean-db/globalSetup"]`.
+
+The way to get around it, is to add the following line as the first one in the existing file (`localGlobalSetupFile.js` in our example:
+```js
+// file: localGlobalSetupFile.js
+import 'jest-test-clean-db/globalSetup';
+```
+</details>
 
 ## Wanna help out?
 
