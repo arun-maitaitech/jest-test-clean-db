@@ -1,8 +1,8 @@
 const shouldLogDebug = Boolean(process.env.JEST_TEST_CLEAN_DB_DEBUG);
 
-export const consoleDebug = (...args: unknown[]) => {
+export const consoleDebug = (msg: string) => {
   if (shouldLogDebug) {
-    console.debug(...args);
+    console.debug(`jest-test-clean-db: ${msg}`);
   }
 };
 

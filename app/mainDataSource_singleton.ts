@@ -35,7 +35,7 @@ export class MainDataSource {
         throw new Error('jest-test-clean-db: Template database already created!');
       }
       this._templateDbName = getTemplateDbName();
-      consoleDebug(`jest-test-clean-db - Creating main template database with name "${this._templateDbName}"`);
+      consoleDebug(`Creating main template database with name "${this._templateDbName}"`);
       this._templateCreationPromise = this._getDataSource()
         .then((_dataSourceInstance) => createNewDbOrThrow(_dataSourceInstance, this._templateDbName))
         .then(
@@ -45,11 +45,12 @@ export class MainDataSource {
               database: this._templateDbName,
             })
         )
-        .then((templateDataSource) => {
-          return templateDataSource
-            .initialize()
-            .then(() => templateDataSource.runMigrations())
-            .then(() => closeConnection(templateDataSource));
+        .then(async (templateDataSource) => {
+          await templateDataSource.initialize();
+          consoleDebug(`START - Applying migrations on the template database...`);
+          await templateDataSource.runMigrations();
+          consoleDebug(`FINISHED - Applying migrations on the template database...`);
+          return await closeConnection(templateDataSource);
         });
     }
     await this._templateCreationPromise;
