@@ -9,9 +9,11 @@
 ## Purpose
 For each `jest` run, this library will:
 1. Creates a new empty "template" DB.
-2. Applies the TypeORM migrations files on it.
-3. Make a copy of the "template" DB for each test that uses the `test_withCleanDB` function instead of jest's `test`, and describe block that uses the `describe_withCleanDB` function instead of jest's `describe`.
-   The `test_withCleanDB` and `describe_withCleanDB` functions are just wrappers of jest's `test` and `describe` function, to extend them.
+1. Applies the TypeORM migrations files on it.
+1. For each pre-selected test:
+    1. Make a copy of the "template" DB (which contains the migration files' changes).
+    1. Run the test as usual on a empty prepared DB.
+1. Clean up.
 
 ## Installing
 
@@ -25,7 +27,7 @@ npm install -D jest-test-clean-db@latest
 
 ### Step 1: **Use the `test_withCleanDB` and `describe_withCleanDB` functions**:
 
-Import the `test_withCleanDB` and `describe_withCleanDB` functions instead of `test` and `describe`, and use them wherever you need a clean initialized DB in your test files:
+Import the `test_withCleanDB` and `describe_withCleanDB` functions, and use them instead of `test` and `describe` wherever you need a clean initialized DB in your test files:
 
 ```typescript
 // some_test_file.test.ts
