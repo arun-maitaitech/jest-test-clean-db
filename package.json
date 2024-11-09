@@ -1,6 +1,5 @@
 {
   "name": "root",
-  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "files": [
@@ -9,13 +8,10 @@
   "scripts": {
     "release": "pnpm --filter ./app run release",
     "task:test": "pnpm --parallel run test",
-    "build":"pnpm --parallel run task:typescript",
+    "build": "pnpm --parallel run task:typescript",
     "test": "pnpm run build && pnpm run task:test",
     "lint": "tsc --target esnext --module NodeNext --moduleResolution NodeNext eslint.config.ts && eslint . --fix",
     "preinstall": "npx only-allow pnpm"
-  },
-  "dependencies": {
-    "np": "^10.0.7"
   },
   "devDependencies": {
     "@types/eslint__js": "^8.42.3",
@@ -25,6 +21,7 @@
     "eslint": "^9.8.0",
     "eslint-plugin-jest": "^28.8.0",
     "globals": "^15.9.0",
+    "np": "^10.0.7",
     "typescript": "^4.7.4",
     "typescript-eslint": "^8.0.1"
   },
