@@ -107,6 +107,20 @@ The way to get around it, is to add the following line as the first one in the e
 // file: localGlobalSetupFile.js
 import 'jest-test-clean-db/globalSetup';
 ```
+
+This solves this error message:
+```
+Option "globalSetup" must be of type:
+  string
+but instead received:
+  array
+Example:
+{
+  "globalSetup": "setup.js"
+}
+Configuration Documentation:
+https://jestjs.io/docs/configuration
+```
 </details>
 
 ## Wanna help out?
