@@ -19,7 +19,7 @@ const uniqueTestNames: Array<string> = [];
  * @return {Promise<void>} - A promise that resolves when the wrapped function completes successfully, or rejects with an error if the wrapped function throws an error.
  * @throws {Error} - If the test name exceeds the maximum allowed length or if the test name is not unique in the project.
  */
-const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void) => {
+const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
   /**
    * Validation of the test name
    */
@@ -51,7 +51,7 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
     let resultOfTheUnderlyingWrappedFunction: void = undefined;
     let errorFromTestFn: Error | null = null;
     try {
-      resultOfTheUnderlyingWrappedFunction = userFn({ dbNameForThisTest, dbDataSource: dbForThisTest });
+      resultOfTheUnderlyingWrappedFunction = await userFn({ dbNameForThisTest, dbDataSource: dbForThisTest });
     } catch (_errFromTestFn) {
       errorFromTestFn = _errFromTestFn;
     } finally {
@@ -72,7 +72,7 @@ void getMainDataSource().createTemplateDB();
 
 export const test_withCleanDB = (
   testName: string,
-  userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void,
+  userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void,
   timeout?: number
 ) => {
   // Call the actual Jest's *test* function along with the (validated) test name and test function
@@ -81,7 +81,7 @@ export const test_withCleanDB = (
 
 export const describe_withCleanDb = (
   testName: number | string | Function | jest.FunctionLike,
-  userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => void
+  userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void
 ) => {
   // Call the actual Jest's *describe* function along with the (validated) block name and block function
   const _testName = typeof testName === 'function' || typeof testName === 'object' ? testName.name : String(testName);

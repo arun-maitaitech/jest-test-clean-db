@@ -4,7 +4,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { baseDataSourceOptions } from './baseDataSourceOptions';
-import { closeConnection, createNewDbOrThrow, deleteDb, duplicateDbOrThrow } from './dbRelatedFunctions';
+import {
+  closeConnection,
+  createNewDbOrThrow,
+  deleteDb,
+  duplicateDbOrThrow,
+  getTemplateDatabaseName,
+  setTemplateDatabaseName
+} from './dbRelatedFunctions';
 import { getTemplateDbName } from './templateDbNameGenerator_singleton';
 import { consoleDebug } from './utils';
 
@@ -29,15 +36,25 @@ export class MainDataSource {
    *
    * @return {Promise<void>} Promise that resolves once the template database is created.
    */
-  async createTemplateDB(): Promise<void> {
+  async createTemplateDB(via?: string): Promise<void> {
+    const existingTemplateDatabaseName = getTemplateDatabaseName();
+
     if (!this._templateCreationPromise) {
       if (this._templateDbName) {
         throw new Error('jest-test-clean-db: Template database already created!');
       }
       this._templateDbName = getTemplateDbName();
-      consoleDebug(`Creating main template database with name "${this._templateDbName}"`);
+      consoleDebug(`Creating main template database with name "${this._templateDbName}" via - ${via || ''}`);
       this._templateCreationPromise = this._getDataSource()
-        .then((_dataSourceInstance) => createNewDbOrThrow(_dataSourceInstance, this._templateDbName))
+        .then((_dataSourceInstance) => {
+          if (existingTemplateDatabaseName) {
+            // database already created, so without creating a new one, we can just use the existing one;
+            this._templateDbName = existingTemplateDatabaseName;
+            return Promise.resolve();
+          } else {
+            return createNewDbOrThrow(_dataSourceInstance, this._templateDbName)
+          }
+        })
         .then(
           () =>
             new DataSource({
@@ -46,6 +63,7 @@ export class MainDataSource {
             })
         )
         .then(async (templateDataSource) => {
+          setTemplateDatabaseName(this._templateDbName);
           await templateDataSource.initialize();
           consoleDebug(`START - Applying migrations on the template database...`);
           const before = Date.now();
