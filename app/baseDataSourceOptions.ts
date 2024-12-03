@@ -1,7 +1,27 @@
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
+
+type IImported_DS_Options = {
+  type: 'postgres';
+  entities: string[];
+  migrations: string[];
+  migrationsRun: boolean;
+  logging: boolean;
+  synchronize: boolean;
+}
+
+const distWithSrcPath = path.resolve(process.cwd(), 'dist', 'src', 'db');
+const dsOptions_configPath = path.resolve(distWithSrcPath, 'dsOptions_config.js');
+let dsOptionsImported: IImported_DS_Options;
+
+try {
+  dsOptionsImported = require(dsOptions_configPath).dsOptions;
+} catch (error) {
+  throw new Error(`Error: Please make sure that the file exists: ${dsOptions_configPath}`);
+}
 
 const distFolder = __dirname;
 const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js,ts}';
@@ -9,17 +29,8 @@ const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js
 const DEFAULT_PORT = 5432;
 
 export const baseDataSourceOptions: PostgresConnectionOptions = {
-  type: 'postgres',
-  entities: [],
-  migrations: [LOCATION_OF_MIGRATION_JS_FILES],
-  migrationsRun: false,
-  logging: Boolean(process.env.POSTGRESQL_DEBUGGING),
-  // schema: options?.schema || DEFAULT_SCHEMA,
-  // dropSchema,
-  synchronize: false,
-  // extra: {
-  //   connectionLimit: utils.isProd() ? 10 : 5,
-  // },
+  ...dsOptionsImported,
+
   host: process.env.TEST_POSTGRESQL_HOSTNAME || '',
   username: process.env.TEST_POSTGRESQL_USERNAME || '',
   password: process.env.TEST_POSTGRESQL_PASSWORD || '',
