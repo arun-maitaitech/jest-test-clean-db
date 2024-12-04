@@ -25,6 +25,10 @@ npm install -D jest-test-clean-db@latest
 
 ## Setup (after installation)
 
+### Prerequisite ( Add ENV ):
+Add ENV variable in your .env `TYPEORM_DS_OPTIONS_PATH` with the path of the dsOptions_config.js file.   
+for eg:  `TYPEORM_DS_OPTIONS_PATH=dist/src/db`
+
 ### Step 1: **Use the `test_withCleanDB` and `describe_withCleanDB` functions**:
 
 Import the `test_withCleanDB` and `describe_withCleanDB` functions, and use them instead of `test` and `describe` wherever you need a clean initialized DB in your test files:

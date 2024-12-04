@@ -13,19 +13,22 @@ type IImported_DS_Options = {
   synchronize: boolean;
 }
 
-const distWithSrcPath = path.resolve(process.cwd(), 'dist', 'src', 'db');
-const dsOptions_configPath = path.resolve(distWithSrcPath, 'dsOptions_config.js');
+let dsOptions_basePath: string;
+if (process.env.TYPEORM_DS_OPTIONS_PATH) {
+  dsOptions_basePath = path.resolve(process.cwd(), process.env.TYPEORM_DS_OPTIONS_PATH);
+} else {
+  throw new Error(`Env variable 'TYPEORM_DS_OPTIONS_PATH' is missing or invalid value, please make sure it have a valid value`);
+}
+
+const dsOptions_configPath = path.resolve(dsOptions_basePath, 'dsOptions_config.js');
 let dsOptionsImported: IImported_DS_Options;
 
 try {
   dsOptionsImported = require(dsOptions_configPath).dsOptions;
 } catch (error) {
-  throw new Error(`Error: Please make sure that the file exists: ${dsOptions_configPath}`);
+  throw new Error(`Unable to load DS options config file, Please make sure that the file exists: ${dsOptions_configPath}, Error:${error}`);
 }
 
-const distFolder = __dirname;
-const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/src/db/migrations/**/*.{js,ts}';
-// consoleDebug('LOCATION_OF_MIGRATION_JS_FILES=' + LOCATION_OF_MIGRATION_JS_FILES)
 const DEFAULT_PORT = 5432;
 
 export const baseDataSourceOptions: PostgresConnectionOptions = {

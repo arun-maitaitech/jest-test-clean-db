@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const filePath = path.resolve(process.cwd(), 'sharedGlobalData.json');
+const filePath = path.resolve(__dirname, 'sharedGlobalData.json');
 
 export const getSharedGlobalData = (): Record<string, any> => {
     let data: string | undefined;
