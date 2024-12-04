@@ -1,9 +1,11 @@
 import { getMainDataSource } from './mainDataSource_singleton';
+import { dumpSharedGlobalData } from './sharedGlobalData';
 import { consoleDebug } from './utils';
 
-const mainDataSource = getMainDataSource();
-consoleDebug(`globalTeardown - wasEverInitialized: ${mainDataSource.wasEverInitialized()}`);
-export const globalTeardown = mainDataSource.closeAndDelete_templateDb();
+
 export default async () => {
-  return await globalTeardown;
+  const mainDataSource = getMainDataSource();
+  consoleDebug(`globalTeardown - wasEverInitialized: ${mainDataSource.wasEverInitialized()}`);
+  await mainDataSource.closeAndDelete_templateDb();
+  return dumpSharedGlobalData();
 };

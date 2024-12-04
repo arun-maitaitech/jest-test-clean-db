@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 
 import { consoleDebug } from './utils';
+import { getSharedGlobalData, setSharedGlobalData } from './sharedGlobalData';
 
 async function checkIfDbExists(dataSource: DataSource, dbName: string) {
   const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
@@ -22,6 +23,17 @@ export async function createNewDbOrThrow(dataSource: DataSource, dbName: string)
 export async function closeConnection(dataSource: DataSource) {
   await dataSource.destroy();
 }
+
+export function getTemplateDatabaseName() {
+  const sharedData = getSharedGlobalData();
+  return sharedData.templateDbName || null;
+}
+
+export function setTemplateDatabaseName(templateDbName: string) {
+  const sharedData = getSharedGlobalData();
+  return setSharedGlobalData({ ...sharedData, templateDbName });
+}
+
 
 export async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
   await assertDbDoesNotExist(dataSource, newDbName);
