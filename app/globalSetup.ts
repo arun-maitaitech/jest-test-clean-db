@@ -1,7 +1,10 @@
 import { getMainDataSource } from './mainDataSource_singleton';
+import { dumpSharedGlobalData } from './sharedGlobalData';
 
 // Initialize the DB
-export const globalSetup = getMainDataSource().createTemplateDB();
 export default async () => {
-  await globalSetup;
+  // dump shared global data if exist from previous run which were to terminated throw teardown
+  dumpSharedGlobalData();
+
+  await getMainDataSource().createOrConnectToExistingTemplateDB();
 };

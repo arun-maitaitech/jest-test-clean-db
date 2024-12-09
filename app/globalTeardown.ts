@@ -1,11 +1,21 @@
-import { getMainDataSource } from './mainDataSource_singleton';
+import { getMainDataSource, getMainDataSource_ofExistingTemplateDB } from './mainDataSource_singleton';
 import { dumpSharedGlobalData } from './sharedGlobalData';
 import { consoleDebug } from './utils';
 
 
 export default async () => {
-  const mainDataSource = getMainDataSource();
-  consoleDebug(`globalTeardown - wasEverInitialized: ${mainDataSource.wasEverInitialized()}`);
-  await mainDataSource.closeAndDelete_templateDb();
+  let  mainDataSource = getMainDataSource();
+  mainDataSource.createOrConnectToExistingTemplateDB();
+  if(mainDataSource.wasEverInitialized()) {
+    await mainDataSource.closeAndDelete_templateDb();
+  }
+
+  // consoleDebug(`globalTeardown - wasEverInitialized: ${mainDataSource.wasEverInitialized()}`);
+  // if(mainDataSource.wasEverInitialized()) {
+  //   await mainDataSource.closeAndDelete_templateDb();
+  // } else {
+  //   mainDataSource = await getMainDataSource_ofExistingTemplateDB();
+  //   await mainDataSource.closeAndDelete_templateDb();
+  // }
   return dumpSharedGlobalData();
 };

@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 
-import { getMainDataSource, MainDataSource } from './mainDataSource_singleton';
+import { getMainDataSource, IDataSourceInitiator, MainDataSource } from './mainDataSource_singleton';
 import { takeFirstCharacters } from './utils';
 
 declare global {
@@ -19,7 +19,7 @@ const uniqueTestNames: Array<string> = [];
  * @return {Promise<void>} - A promise that resolves when the wrapped function completes successfully, or rejects with an error if the wrapped function throws an error.
  * @throws {Error} - If the test name exceeds the maximum allowed length or if the test name is not unique in the project.
  */
-const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
+const unwrap = (testName: string, dataSourceInitiator: IDataSourceInitiator, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
   /**
    * Validation of the test name
    */
@@ -34,7 +34,7 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
         : '';
     throw new Error(
       `Test name (${_describeBlockPrefix}${shortenedTestName}) is not unique in this project.\n` +
-        `This might cause it to use the same DB of another test.${_errMsgPostfix}`
+      `This might cause it to use the same DB of another test.${_errMsgPostfix}`
     );
   } else {
     uniqueTestNames.push(testName);
@@ -46,7 +46,7 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
      */
     const mainDataSource = getMainDataSource();
 
-    const { dbNameForThisTest, dbForThisTest } = await mainDataSource.createTestDb_fromTemplateDB(testName);
+    const { dbNameForThisTest, dbForThisTest } = await mainDataSource.createTestDb_fromTemplateDB(testName, dataSourceInitiator);
 
     let resultOfTheUnderlyingWrappedFunction: void = undefined;
     let errorFromTestFn: Error | null = null;
@@ -68,22 +68,24 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
 };
 
 // Initialize the DB
-void getMainDataSource().createTemplateDB();
+void getMainDataSource().createOrConnectToExistingTemplateDB();
 
 export const test_withCleanDB = (
   testName: string,
+  dataSourceInitiator: IDataSourceInitiator,
   userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void,
-  timeout?: number
+  timeout?: number,
 ) => {
   // Call the actual Jest's *test* function along with the (validated) test name and test function
-  return global.test(testName, unwrap(testName, userFn), timeout);
+  return global.test(testName, unwrap(testName, dataSourceInitiator, userFn), timeout);
 };
 
 export const describe_withCleanDb = (
   testName: number | string | Function | jest.FunctionLike,
+  dataSourceInitiator: IDataSourceInitiator,
   userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void
 ) => {
   // Call the actual Jest's *describe* function along with the (validated) block name and block function
   const _testName = typeof testName === 'function' || typeof testName === 'object' ? testName.name : String(testName);
-  return global.describe(testName, unwrap(_testName, userFn));
+  return global.describe(testName, unwrap(_testName, dataSourceInitiator, userFn));
 };
