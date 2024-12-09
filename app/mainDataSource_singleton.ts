@@ -15,6 +15,8 @@ import {
 import { getTemplateDbName } from './templateDbNameGenerator_singleton';
 import { consoleDebug } from './utils';
 
+export type IDataSourceInitiator = (dbName: string) => Promise<DataSource>;
+
 export class MainDataSource {
   private _dataSource: DataSource | null = null;
   private _templateDbName: string = '';
@@ -36,35 +38,23 @@ export class MainDataSource {
    *
    * @return {Promise<void>} Promise that resolves once the template database is created.
    */
-  async createTemplateDB(via?: string): Promise<void> {
+  async createOrConnectToExistingTemplateDB(): Promise<void> {
     const existingTemplateDatabaseName = getTemplateDatabaseName();
 
     if (!this._templateCreationPromise) {
       if (this._templateDbName) {
         throw new Error('jest-test-clean-db: Template database already created!');
       }
-      this._templateDbName = getTemplateDbName();
-      consoleDebug(`Creating main template database with name "${this._templateDbName}" via - ${via || ''}`);
-      this._templateCreationPromise = this._getDataSource()
-        .then((_dataSourceInstance) => {
-          if (existingTemplateDatabaseName) {
-            // database already created, so without creating a new one, we can just use the existing one;
-            this._templateDbName = existingTemplateDatabaseName;
-            return Promise.resolve();
-          } else {
-            return createNewDbOrThrow(_dataSourceInstance, this._templateDbName)
-          }
-        })
-        .then(
-          () =>
-            new DataSource({
-              ...baseDataSourceOptions,
-              database: this._templateDbName,
-            })
-        )
+
+      if (!existingTemplateDatabaseName) {
+        this._templateDbName = getTemplateDbName();
+      }
+      consoleDebug(`Creating main template database with name "${this._templateDbName}"`);
+      this._templateCreationPromise = this.createOrConnectToDB(existingTemplateDatabaseName ?
+        { connectToDB_name: existingTemplateDatabaseName } : { createDB_name: this._templateDbName }
+      )
         .then(async (templateDataSource) => {
           setTemplateDatabaseName(this._templateDbName);
-          await templateDataSource.initialize();
           consoleDebug(`START - Applying migrations on the template database...`);
           const before = Date.now();
           await templateDataSource.runMigrations();
@@ -76,30 +66,48 @@ export class MainDataSource {
     await this._templateCreationPromise;
   }
 
+  createOrConnectToDB = async (input: { createDB_name: string } | { connectToDB_name: string }) => { 
+    
+    const dataSourceExisting = await this._getDataSource();
+    
+    if('connectToDB_name' in input && input.connectToDB_name) {
+      this._templateDbName = input.connectToDB_name;
+    }
+
+    if('createDB_name' in input && input.createDB_name) {
+      await createNewDbOrThrow(dataSourceExisting, input.createDB_name);
+    }
+
+    const dataSourceNewlyInitiated = new DataSource({
+      ...baseDataSourceOptions,
+      database: this._templateDbName,
+    });
+
+    await dataSourceNewlyInitiated.initialize();
+
+    return dataSourceNewlyInitiated;
+  }
+
   wasEverInitialized() {
     return Boolean(this._templateCreationPromise);
   }
 
-  async createTestDb_fromTemplateDB(testName: string) {
+  async createTestDb_fromTemplateDB(testName: string, dataSourceInitiator: IDataSourceInitiator) {
     if (!this._templateCreationPromise) {
-      throw new Error(`jest-test-clean-db: Template database was not created. Use createTemplateDB() first!`);
+      throw new Error(`jest-test-clean-db: Template database was not created. Use createOrConnectToExistingTemplateDB() first!`);
     }
     await this._templateCreationPromise;
     const ds = await this._getDataSource();
     const dbNameForThisTest = `${this._templateDbName}-${testName}`;
     await duplicateDbOrThrow(ds, dbNameForThisTest, this._templateDbName);
 
-    const dbForThisTest = new DataSource({
-      ...baseDataSourceOptions,
-      database: dbNameForThisTest,
-    });
-    await dbForThisTest.initialize();
+    const dbForThisTest = await dataSourceInitiator(dbNameForThisTest);
     return { dbNameForThisTest, dbForThisTest };
   }
 
   async closeAndDelete_testDb(input: { dbNameForThisTest: string; dbForThisTest: DataSource }) {
     if (!this._templateCreationPromise) {
-      throw new Error(`jest-test-clean-db: Template database was not created. Use createTemplateDB() first!`);
+      throw new Error(`jest-test-clean-db: Template database was not created. Use createOrConnectToExistingTemplateDB() first!`);
     }
     await this._templateCreationPromise;
     const { dbNameForThisTest, dbForThisTest } = input;
