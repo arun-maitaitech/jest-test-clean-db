@@ -11,7 +11,7 @@
     "../README.md"
   ],
   "scripts": {
-    "task:release": "dotenv -e .env np -- --no-2fa",
+    "task:release": "dotenv -e .env np -- --no-2fa --no-cleanup",
     "task:test_OLD": "jest --runInBand --detectOpenHandles --forceExit",
     "task:typescript": "tsc --pretty",
     "task:typescript_elaborated": "tsc -sourcemap -incremental --pretty",
