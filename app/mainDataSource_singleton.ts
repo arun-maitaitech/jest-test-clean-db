@@ -88,10 +88,6 @@ export class MainDataSource {
     return dataSourceNewlyInitiated;
   }
 
-  connectToExistingTemplateDB = async () => {
-
-  }
-
   wasEverInitialized() {
     return Boolean(this._templateCreationPromise);
   }
@@ -133,12 +129,4 @@ export function getMainDataSource() {
     global.mainDataSource = new MainDataSource();
   }
   return global.mainDataSource;
-}
-
-export async function getMainDataSource_ofExistingTemplateDB() {
-  const existingTemplateDatabaseName = getTemplateDatabaseName();
-
-  const mainDataSource = new MainDataSource();
-  await mainDataSource.createOrConnectToDB({ connectToDB_name: existingTemplateDatabaseName });
-  return mainDataSource;
 }
