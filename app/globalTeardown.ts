@@ -5,10 +5,11 @@ import { consoleDebug } from './utils';
 
 export default async () => {
   let  mainDataSource = getMainDataSource();
-  mainDataSource.createOrConnectToExistingTemplateDB();
+  await mainDataSource.connectToExistingTemplateDB();
   if(mainDataSource.wasEverInitialized()) {
     await mainDataSource.closeAndDelete_templateDb();
   }
 
+  // cleaning up shared global data;
   return dumpSharedGlobalData();
 };
