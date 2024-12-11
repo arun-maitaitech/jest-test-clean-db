@@ -64,6 +64,9 @@ export class MainDataSource {
 
     await templateDatabaseDataSource.initialize();
 
+    // to keep the wasEverInitialized() return true
+    this._templateCreationPromise = Promise.resolve();
+
     return templateDatabaseDataSource;
   }
 
@@ -138,9 +141,10 @@ export class MainDataSource {
     const ds = await this._getDataSource();
     await deleteDb(ds, dbNameForThisTest);
   }
-  async closeAndDelete_templateDb() {
+  async closeAndDelete_templateDb(templateDbDataSource: DataSource) {
     if (this.wasEverInitialized()) {
       await this._templateCreationPromise;
+      await closeConnection(templateDbDataSource);
       const ds = await this._getDataSource();
       await deleteDb(ds, this._templateDbName);
     }

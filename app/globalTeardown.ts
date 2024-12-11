@@ -1,13 +1,12 @@
 import { getMainDataSource } from './mainDataSource_singleton';
 import { dumpSharedGlobalData } from './sharedGlobalData';
-import { consoleDebug } from './utils';
 
 
 export default async () => {
   let  mainDataSource = getMainDataSource();
-  await mainDataSource.connectToExistingTemplateDB();
+  const templateDbDataSource = await mainDataSource.connectToExistingTemplateDB();
   if(mainDataSource.wasEverInitialized()) {
-    await mainDataSource.closeAndDelete_templateDb();
+    await mainDataSource.closeAndDelete_templateDb(templateDbDataSource);
   }
 
   // cleaning up shared global data;
