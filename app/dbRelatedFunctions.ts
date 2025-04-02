@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 
 import { consoleDebug } from './utils';
-import { getSharedGlobalData, setSharedGlobalData } from './sharedGlobalData';
+import { filePath, getSharedGlobalData, setSharedGlobalData } from './sharedGlobalData';
 
 async function checkIfDbExists(dataSource: DataSource, dbName: string) {
   const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
@@ -24,9 +24,14 @@ export async function closeConnection(dataSource: DataSource) {
   await dataSource.destroy();
 }
 
-export function getTemplateDatabaseName() {
+export function getTemplateDatabaseName(): string {
   const sharedData = getSharedGlobalData();
-  return sharedData.templateDbName || null;
+  if (!('templateDbName' in sharedData)) {
+    throw new Error(`Could not find required 'templateDbName' key in JSON file at ${filePath}`);
+  } else if (typeof sharedData.templateDbName !== 'string') {
+    throw new Error(`The value of 'templateDbName' key in JSON file at ${filePath} is not a string`);
+  }
+  return sharedData.templateDbName;
 }
 
 export function setTemplateDatabaseName(templateDbName: string) {
